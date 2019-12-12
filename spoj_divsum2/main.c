@@ -1821,15 +1821,16 @@ hash_map_robin_hood_back_shift_insertar_nuevo (hm_rr_bs_tabla * ht, void *llave,
 
 
 #if 1 /* divsum2 */
-#define MAX_NUM ((natural)5E5)
+#define DIVSUM2_MAX_PRIMO ((natural)1E8)
+#define DIVSUM2_MAX_SUMA_PRECALCULADA ((natural)5E5)
 #define DIVSUM2_MAX_FACTORES_PRIMOS 10
 #define DIVSUM2_MAX_CONTRIBUCION_PRIMOS_MAYORES 46415888337
 typedef struct sumas_divisores{
-    hm_rr_bs_tabla contribuciones_primos_memoria[MAX_NUM+1];
-    hm_rr_bs_tabla *contribuciones_primos[MAX_NUM+1];
-    entero_largo_sin_signo sumas_divisores[MAX_NUM+1];
-    entero_largo_sin_signo factores_primos[MAX_NUM+1][DIVSUM2_MAX_FACTORES_PRIMOS];
-    entero_largo_sin_signo factores_primos_cnt[MAX_NUM+1];
+    hm_rr_bs_tabla contribuciones_primos_memoria[DIVSUM2_MAX_SUMA_PRECALCULADA+1];
+    hm_rr_bs_tabla *contribuciones_primos[DIVSUM2_MAX_SUMA_PRECALCULADA+1];
+    entero_largo_sin_signo sumas_divisores[DIVSUM2_MAX_SUMA_PRECALCULADA+1];
+    entero_largo_sin_signo factores_primos[DIVSUM2_MAX_SUMA_PRECALCULADA+1][DIVSUM2_MAX_FACTORES_PRIMOS];
+    entero_largo_sin_signo factores_primos_cnt[DIVSUM2_MAX_SUMA_PRECALCULADA+1];
 }sumas_divisores;
 
 void divsum2_primo_encontrado(natural primo,
@@ -1837,8 +1838,11 @@ natural idx_primo,
                                   void *cb_ctx){
     
     sumas_divisores *sd=cb_ctx;
-    hm_rr_bs_tabla *contribuciones=sd->contribuciones_primos[primo];
     entero_largo_sin_signo nueva_contribucion_primo=primo+1;
+    if(primo>DIVSUM2_MAX_SUMA_PRECALCULADA){
+        return;
+    }
+    hm_rr_bs_tabla *contribuciones=sd->contribuciones_primos[primo];
     
     sd->sumas_divisores[primo]=nueva_contribucion_primo;
     hash_map_robin_hood_back_shift_insertar_nuevo(contribuciones, (void*)(entero_largo_sin_signo)primo, nueva_contribucion_primo);
@@ -1849,19 +1853,27 @@ natural idx_primo,
 natural compuesto,
                                    void *cb_ctx){
     sumas_divisores *sd=cb_ctx;
-    hm_rr_bs_tabla *contribuciones=sd->contribuciones_primos[compuesto];
     entero_largo_sin_signo *sumas_divisores=sd->sumas_divisores;
     entero_largo_sin_signo nuevo_compuesto=compuesto*primo;
-    hm_rr_bs_tabla *contribuciones_nuevo_compuesto=sd->contribuciones_primos[nuevo_compuesto];
-    entero_largo_sin_signo *factores_primos=sd->factores_primos[compuesto];
-    entero_largo_sin_signo *factores_primos_nuevo_compuesto=sd->factores_primos[nuevo_compuesto];
     hm_iter iter=HASH_MAP_VALOR_INVALIDO;
+    hm_rr_bs_tabla *contribuciones=NULL;
+    hm_rr_bs_tabla *contribuciones_nuevo_compuesto=NULL;
+    entero_largo_sin_signo *factores_primos=NULL;
+    entero_largo_sin_signo *factores_primos_nuevo_compuesto=NULL;
     entero_largo_sin_signo suma_divisores_compuesto=0;
     entero_largo_sin_signo contribucion_primo=0;
     entero_largo_sin_signo nueva_contribucion_primo=0;
     entero_largo_sin_signo complemento_contribucion_primo=0;
     entero_largo_sin_signo suma_divisores_nuevo_compuesto=0;
     natural i=0;
+    
+    if(nuevo_compuesto>DIVSUM2_MAX_SUMA_PRECALCULADA){
+        return;
+    }
+    contribuciones=sd->contribuciones_primos[compuesto];
+    factores_primos=sd->factores_primos[compuesto];
+    contribuciones_nuevo_compuesto=sd->contribuciones_primos[nuevo_compuesto];
+    factores_primos_nuevo_compuesto=sd->factores_primos[nuevo_compuesto];
     
     iter= hash_map_robin_hood_back_shift_obten(contribuciones, (void*)(entero_largo_sin_signo)primo, (entero_largo *)&contribucion_primo);
     assert_timeout(iter!=HASH_MAP_VALOR_INVALIDO);
@@ -1901,16 +1913,25 @@ natural idx_primo,
 natural compuesto,
                                       void *cb_ctx){
     sumas_divisores *sd=cb_ctx;
-    hm_rr_bs_tabla *contribuciones=sd->contribuciones_primos[compuesto];
     entero_largo_sin_signo *sumas_divisores=sd->sumas_divisores;
     entero_largo_sin_signo nuevo_compuesto=compuesto*primo;
     entero_largo_sin_signo nueva_contribucion_primo=primo+1;
-    hm_rr_bs_tabla *contribuciones_nuevo_compuesto=sd->contribuciones_primos[nuevo_compuesto];
-    entero_largo_sin_signo *factores_primos=sd->factores_primos[compuesto];
-    entero_largo_sin_signo *factores_primos_nuevo_compuesto=sd->factores_primos[nuevo_compuesto];
-    entero_largo_sin_signo suma_divisores_nuevo_compuesto=sumas_divisores[compuesto]*nueva_contribucion_primo;
+    hm_rr_bs_tabla *contribuciones=NULL;
+    hm_rr_bs_tabla *contribuciones_nuevo_compuesto=NULL;
+    entero_largo_sin_signo *factores_primos=NULL;
+    entero_largo_sin_signo *factores_primos_nuevo_compuesto=NULL;
+    entero_largo_sin_signo suma_divisores_nuevo_compuesto=0;
     hm_iter iter=HASH_MAP_VALOR_INVALIDO;
     entero_largo i=0;
+    
+    if(nuevo_compuesto>DIVSUM2_MAX_SUMA_PRECALCULADA){
+        return;
+    }
+    contribuciones=sd->contribuciones_primos[compuesto];
+    contribuciones_nuevo_compuesto=sd->contribuciones_primos[nuevo_compuesto];
+    factores_primos=sd->factores_primos[compuesto];
+    factores_primos_nuevo_compuesto=sd->factores_primos[nuevo_compuesto];
+    suma_divisores_nuevo_compuesto=sumas_divisores[compuesto]*nueva_contribucion_primo;
 
     factores_primos_nuevo_compuesto[0]=primo;
     hash_map_robin_hood_back_shift_insertar_nuevo(contribuciones_nuevo_compuesto, (void*)(entero_largo_sin_signo)primo, nueva_contribucion_primo);
@@ -1935,7 +1956,7 @@ natural compuesto,
 }
 
 COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_calcula_contribucion_primos_mayores(
-                                                                                    entero_largo_sin_signo n) {
+                                                                                    entero_largo_sin_signo n, natural ultimo_primo_menor_idx, primos_datos *pd) {
     entero_largo_sin_signo r = 0;
     comun_log_debug("libre de cua de %llu", n);
     if (n == 1 || primalidad_es_primo(n, PRIMALIDAD_INTENTOS_ES_PRIMO)) {
@@ -1951,9 +1972,10 @@ COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_calcula_contribucion_primos_ma
             comun_log_debug("cuadratico r %llu", r);
         } else {
             assert_timeout_dummy(n!=1);
-            entero_largo_sin_signo primo = COMUN_VALOR_INVALIDO;
             entero_largo_sin_signo i = 0;
-            for (i = MAX_NUM; i < DIVSUM2_MAX_CONTRIBUCION_PRIMOS_MAYORES; i++) {
+            entero_largo_sin_signo primo = COMUN_VALOR_INVALIDO;
+            for (i = ultimo_primo_menor_idx; i < pd->primos_criba_tam; i++) {
+                primo = pd->primos_criba[i];
                 if (!(n % i)) {
                     primo = i;
                     break;
@@ -1968,45 +1990,51 @@ COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_calcula_contribucion_primos_ma
     return r;
 }
 
-COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_encuentra_divisor_proximo_menor(
-                                                                                entero_largo_sin_signo
-                                                                                  n, entero_largo_sin_signo d) {
-    while (n % d && d) {
-        d--;
+COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_calcula_contribucion_primos_menores(entero_largo_sin_signo n, primos_datos *pd, natural *ultimo_primo_idx, entero_largo_sin_signo *factor_primos_mayores){
+    natural raiz_cubica = cbrt(n);
+    entero_largo_sin_signo r=1;
+    natural i=0;
+    *ultimo_primo_idx=COMUN_VALOR_INVALIDO;
+    *factor_primos_mayores=COMUN_VALOR_INVALIDO;
+    for(i=0;pd->primos_criba[i]<=raiz_cubica && i<pd->primos_criba_tam;i++){
+        entero_largo_sin_signo primo=pd->primos_criba[i];
+        entero_largo_sin_signo contribucion_primo=1;
+        while(!(n%primo)){
+            contribucion_primo=contribucion_primo*primo +1;
+            n/=primo;
+        }
+        r*=contribucion_primo;
     }
-    assert_timeout(d);
-    return d;
+    *ultimo_primo_idx=i;
+    *factor_primos_mayores=n;
+    
+    return r;
 }
 
-COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_core(entero_largo_sin_signo n, sumas_divisores *sd)
+COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_core(entero_largo_sin_signo n, primos_datos *pd,sumas_divisores *sd)
 {
     if (n == 1) {
         return 1;
     }
-    natural raiz_cubica = cbrt(n);
-    comun_log_debug("n %llu raiz cub %u", n, raiz_cubica);
     entero_largo_sin_signo contribucion_primos_menores = 1;
     entero_largo_sin_signo contribucion_primos_mayores = 1;
-    entero_largo_sin_signo factor_primos_menores = 0;
     entero_largo_sin_signo factor_primos_mayores = 0;
     entero_largo_sin_signo r = 0;
+    natural ultimo_primo_menor_idx=0;
     
     if (primalidad_es_primo(n, PRIMALIDAD_INTENTOS_ES_PRIMO)) {
         r = n + 1;
     } else {
-        factor_primos_menores = divsum2_encuentra_divisor_proximo_menor(n,
-                                                                      raiz_cubica);
-        factor_primos_mayores = n / factor_primos_menores;
-        
+        contribucion_primos_menores=divsum2_calcula_contribucion_primos_menores(n, pd, &ultimo_primo_menor_idx, &factor_primos_mayores);
+
         comun_log_debug("contribucion primos mayores %llu menores %llu",
-                        factor_primos_mayores, factor_primos_menores);
-        contribucion_primos_menores = sd->sumas_divisores[factor_primos_menores];
-        
-        if(factor_primos_mayores<=MAX_NUM){
+                        contribucion_primos_menores, factor_primos_menores);
+
+        if(factor_primos_mayores<=DIVSUM2_MAX_SUMA_PRECALCULADA){
             contribucion_primos_mayores = sd->sumas_divisores[factor_primos_mayores];
         }
         else{
-            contribucion_primos_mayores=divsum2_calcula_contribucion_primos_mayores(factor_primos_mayores);
+            contribucion_primos_mayores=divsum2_calcula_contribucion_primos_mayores(factor_primos_mayores,ultimo_primo_menor_idx,pd);
         }
         comun_log_debug("contri menores %llu mayores %llu",
                         contribucion_primos_menores, contribucion_primos_mayores);
@@ -2024,7 +2052,7 @@ COMUN_FUNC_STATICA void divsum2_main(){
     sd=calloc(1, sizeof(sumas_divisores));
     assert_timeout(sd);
     
-    for(t=0;t<=MAX_NUM;t++){
+    for(t=0;t<=DIVSUM2_MAX_SUMA_PRECALCULADA;t++){
         sd->contribuciones_primos[t]=&(sd->contribuciones_primos_memoria[t]);
         hash_map_robin_hood_back_shift_init(sd->contribuciones_primos[t], DIVSUM2_MAX_FACTORES_PRIMOS<<1);
     }
@@ -2033,7 +2061,7 @@ COMUN_FUNC_STATICA void divsum2_main(){
     pd=calloc(1, sizeof(primos_datos));
     assert_timeout(pd);
     
-    primos_criba_criba(MAX_NUM, divsum2_primo_encontrado, NULL, divsum2_divisible_encontrado, divsum2_no_divisible_encontrado, sd, pd);
+    primos_criba_criba(DIVSUM2_MAX_PRIMO, divsum2_primo_encontrado, NULL, divsum2_divisible_encontrado, divsum2_no_divisible_encontrado, sd, pd);
     
 #ifdef __APPLE__
     if (getenv ("STDIN"))
@@ -2065,7 +2093,7 @@ COMUN_FUNC_STATICA void divsum2_main(){
     scanf("%u",&t);
     while(t--){
         scanf("%llu",&n);
-        entero_largo_sin_signo r=divsum2_core(n, sd);
+        entero_largo_sin_signo r=divsum2_core(n, pd,sd);
         printf("%llu\n",r-n);
     }
 }
