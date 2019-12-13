@@ -790,7 +790,7 @@ COMUN_FUNC_STATICA bool bit_checa(bit_vector_ctx *bvctx,
     natural idx_arreglo = 0;
     natural idx_registro = 0;
     
-    idx_arreglo = posicion / 64;
+    idx_arreglo = (natural)posicion / 64;
     idx_registro = posicion % 64;
     
     resultado = bvctx->bit_mapa[idx_arreglo]
@@ -804,7 +804,7 @@ COMUN_FUNC_STATICA void bit_asigna(bit_vector_ctx *bvctx,
     natural idx_arreglo = 0;
     natural idx_registro = 0;
     
-    idx_arreglo = posicion / 64;
+    idx_arreglo = (natural)posicion / 64;
     idx_registro = posicion % 64;
     
     bvctx->bit_mapa[idx_arreglo] |= (bit_vector) ((bit_vector) 1
@@ -819,7 +819,7 @@ COMUN_FUNC_STATICA void bit_limpia(bit_vector_ctx *bvctx,
     int idx_registro = 0;
     bit_vector *bits = bvctx->bit_mapa;
     
-    idx_arreglo = posicion / 64;
+    idx_arreglo = (natural)posicion / 64;
     idx_registro = posicion % 64;
     
     bits[idx_arreglo] &= (bit_vector) ~((bit_vector) 1 << idx_registro);
