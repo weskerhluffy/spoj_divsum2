@@ -7,6 +7,10 @@
 //
 
 
+// XXX: https://mukeshiiitm.wordpress.com/2011/07/08/spoj-1754-divisor-summation-hard/
+// XXX: https://cp-algorithms.com/algebra/divisors.html
+// XXX: https://www.spoj.com/problems/DIVSUM2/
+
 #if 1
 #define _GNU_SOURCE
 #include <stdio.h>

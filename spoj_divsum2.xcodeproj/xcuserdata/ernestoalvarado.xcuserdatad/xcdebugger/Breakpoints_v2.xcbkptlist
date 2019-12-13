@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "spoj_divsum2/main.c"
-            timestampString = "597929011.0449539"
+            timestampString = "597929648.2705981"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2062"
-            endingLineNumber = "2062"
-            landmarkName = "divsum2_core"
+            startingLineNumber = "1555"
+            endingLineNumber = "1555"
+            landmarkName = "hash_map_robin_hood_back_shift_pon"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
