@@ -1819,6 +1819,48 @@ hash_map_robin_hood_back_shift_insertar_nuevo (hm_rr_bs_tabla * ht, void *llave,
 
 #endif /* HASH_TABLE */
 
+#if 1 /* POLLARD_RHO */
+COMUN_FUNC_STATICA entero_largo_sin_signo pollard_rho_pseudo_rand(entero_largo_sin_signo x, entero_largo_sin_signo c,entero_largo_sin_signo mod){
+    entero_largo_sin_signo r = primalidad_mul_mod(x, x, mod)+c;
+    if(r>=mod){
+        r-=mod;
+    }
+    return r;
+}
+
+COMUN_FUNC_STATICA entero_largo_sin_signo pollard_rho_core(entero_largo_sin_signo n, natural intentos){
+    entero_largo_sin_signo a=2;
+    entero_largo_sin_signo b=a;
+    entero_largo_sin_signo c=2;
+    entero_largo_sin_signo d=1;
+    entero_largo_sin_signo k=2;
+    natural i=0;
+    natural j=0;
+    while(i<intentos){
+        j=0;
+        k=2;
+        while (verdadero) {
+            a=pollard_rho_pseudo_rand(a,c+i, n);
+            entero_largo_sin_signo a_b=a>b?a-b:b-a;
+            d=comun_mcd(a_b, n);
+            if(d>1){
+                break;
+            }
+            if(++j==k){
+                k<<=1;
+                b=a;
+            }
+        }
+        if(d!=n){
+            return d;
+        }
+        i++;
+    }
+    return COMUN_VALOR_INVALIDO;
+}
+
+#endif /* POLLARD_RHO */
+
 
 #if 1 /* divsum2 */
 #define DIVSUM2_MAX_PRIMO ((natural)1E8)
@@ -1972,15 +2014,7 @@ COMUN_FUNC_STATICA entero_largo_sin_signo divsum2_calcula_contribucion_primos_ma
             comun_log_debug("cuadratico r %llu", r);
         } else {
             assert_timeout_dummy(n!=1);
-            entero_largo_sin_signo i = 0;
-            entero_largo_sin_signo primo = COMUN_VALOR_INVALIDO;
-            for (i = ultimo_primo_menor_idx; i < pd->primos_criba_tam; i++) {
-                primo = pd->primos_criba[i];
-                if (!(n % i)) {
-                    primo = i;
-                    break;
-                }
-            }
+            entero_largo_sin_signo primo = pollard_rho_core(n, 10);
             
             assert_timeout(primo!=COMUN_VALOR_INVALIDO);
             entero_largo_sin_signo primo_complemento = n / primo;

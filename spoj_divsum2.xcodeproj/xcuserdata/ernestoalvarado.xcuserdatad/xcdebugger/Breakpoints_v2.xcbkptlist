@@ -6,15 +6,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "spoj_divsum2/main.c"
-            timestampString = "597842140.749173"
+            timestampString = "597929011.0449539"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2028"
-            endingLineNumber = "2028"
+            startingLineNumber = "2062"
+            endingLineNumber = "2062"
             landmarkName = "divsum2_core"
             landmarkType = "9">
          </BreakpointContent>
